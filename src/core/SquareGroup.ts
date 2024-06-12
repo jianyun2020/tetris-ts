@@ -7,6 +7,10 @@ import { IPoint, Shape } from "./types";
 export class SquareGroup {
   private _squares: ReadonlyArray<Square>;
 
+  public get shape() {
+    return this._shape;
+  }
+
   public get squares() {
     return this._squares;
   }

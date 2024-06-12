@@ -1,4 +1,6 @@
 import { createTetris } from "./core/Tetris";
+import { TetrisRule } from "./core/TetrisRule";
+import { MoveDirection } from "./core/types";
 import { SquarePageViewer } from "./core/viewer/SquarePageViewer";
 import $ from 'jquery';
 
@@ -9,29 +11,17 @@ tetris.squares.forEach(sq => {
 })
 
 $("#btnDown").on('click', function() {
-  tetris.centerPoint = {
-    x: tetris.centerPoint.x,
-    y: tetris.centerPoint.y + 1
-  }
+  TetrisRule.moveDirectly(tetris, MoveDirection.down)
 })
 
 $("#btnUp").on('click', function() {
-  tetris.centerPoint = {
-    x: tetris.centerPoint.x,
-    y: tetris.centerPoint.y - 1
-  }
+  TetrisRule.move(tetris, {x: tetris.centerPoint.x, y: tetris.centerPoint.y - 1})
 })
 
 $("#btnLeft").on('click', function() {
-  tetris.centerPoint = {
-    x: tetris.centerPoint.x - 1,
-    y: tetris.centerPoint.y
-  }
+  TetrisRule.move(tetris, MoveDirection.left)
 })
 
 $("#btnRight").on('click', function() {
-  tetris.centerPoint = {
-    x: tetris.centerPoint.x + 1,
-    y: tetris.centerPoint.y
-  }
+  TetrisRule.move(tetris, MoveDirection.right)
 })
