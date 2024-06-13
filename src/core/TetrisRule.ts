@@ -86,4 +86,17 @@ export class TetrisRule {
       // 循环移动，直到不能移动为止
     }
   }
+
+
+  /**
+   * 方块旋转
+   */
+  static rotate(tetris: SquareGroup): boolean {
+    const newShape = tetris.afterRotateShape(); // 得到旋转之后新的形状
+    if (this.canIMove(newShape, tetris.centerPoint)) {
+      tetris.rotate();
+      return true;
+    }
+    return false;
+  }
 }

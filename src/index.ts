@@ -25,3 +25,7 @@ $("#btnLeft").on('click', function() {
 $("#btnRight").on('click', function() {
   TetrisRule.move(tetris, MoveDirection.right)
 })
+
+$("#btnRotate").on('click', function() {
+  TetrisRule.rotate(tetris);
+})
