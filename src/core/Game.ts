@@ -69,7 +69,8 @@ export class Game {
 
   controlDown() {
     if (this._curTetris && this._gameState === GameState.playing) {
-      TetrisRule.move(this._curTetris, MoveDirection.down, this._existSquares);
+      TetrisRule.moveDirectly(this._curTetris, MoveDirection.down, this._existSquares);
+      this.hitBottom();
     }
   } 
 
