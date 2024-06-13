@@ -1,31 +1,31 @@
-import { createTetris } from "./core/Tetris";
-import { TetrisRule } from "./core/TetrisRule";
-import { MoveDirection } from "./core/types";
-import { SquarePageViewer } from "./core/viewer/SquarePageViewer";
+import { Game } from "./core/Game";
+import { GamePageViewer } from "./core/viewer/GamePageViewer";
 import $ from 'jquery';
 
-const tetris = createTetris({x: 3, y: 2})
+const g = new Game(new GamePageViewer());
 
-tetris.squares.forEach(sq => {
-  sq.viewer = new SquarePageViewer(sq, $('#root'));
+
+$("#btnStart").on('click', function() {
+  g.start();
 })
 
-$("#btnDown").on('click', function() {
-  TetrisRule.moveDirectly(tetris, MoveDirection.down)
-})
-
-$("#btnUp").on('click', function() {
-  TetrisRule.move(tetris, {x: tetris.centerPoint.x, y: tetris.centerPoint.y - 1})
+$("#btnPause").on('click', function() {
+  g.pause();
 })
 
 $("#btnLeft").on('click', function() {
-  TetrisRule.move(tetris, MoveDirection.left)
+  g.controLeft();
 })
 
 $("#btnRight").on('click', function() {
-  TetrisRule.move(tetris, MoveDirection.right)
+  g.controlRight();
+})
+
+$("#btnDown").on('click', function() {
+  g.controlDown();
 })
 
 $("#btnRotate").on('click', function() {
-  TetrisRule.rotate(tetris);
+  g.controlRotate();
 })
+

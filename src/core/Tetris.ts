@@ -145,7 +145,6 @@ export const shapes = [
 
 export const colors = [
   'red',
-  '#fff',
   'green',
   'blue',
   'orange'
