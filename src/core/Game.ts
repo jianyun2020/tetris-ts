@@ -1,4 +1,5 @@
 import GameConfig from "./GameConfig";
+import { Square } from "./Square";
 import { SquareGroup } from "./SquareGroup";
 import { createTetris } from "./Tetris";
 import { TetrisRule } from "./TetrisRule";
@@ -18,6 +19,8 @@ export class Game {
   private _timer?: number;
   // 自动下落的间隔时间
   private _duration: number = 1000;
+  // 当前游戏中，已经存在的方块
+  private _existSquares: Square[] = [];
 
   constructor(private _viewer: IGameViewer) {
     this.resetCenterPoint(GameConfig.nextSize.width, this._nextTetris);
@@ -54,25 +57,25 @@ export class Game {
 
   controLeft() {
     if (this._curTetris && this._gameState === GameState.playing) {
-      TetrisRule.move(this._curTetris, MoveDirection.left);
+      TetrisRule.move(this._curTetris, MoveDirection.left, this._existSquares);
     }
   }
 
   controlRight() {
     if (this._curTetris && this._gameState === GameState.playing) {
-      TetrisRule.move(this._curTetris, MoveDirection.right);
+      TetrisRule.move(this._curTetris, MoveDirection.right, this._existSquares);
     }
   }
 
   controlDown() {
     if (this._curTetris && this._gameState === GameState.playing) {
-      TetrisRule.move(this._curTetris, MoveDirection.down);
+      TetrisRule.move(this._curTetris, MoveDirection.down, this._existSquares);
     }
   } 
 
   controlRotate() {
     if (this._curTetris && this._gameState === GameState.playing) {
-      TetrisRule.rotate(this._curTetris);
+      TetrisRule.rotate(this._curTetris, this._existSquares);
     }
   }
 
@@ -100,7 +103,10 @@ export class Game {
 
     this._timer = setInterval(() => {
       if (this._curTetris) {
-        TetrisRule.move(this._curTetris, MoveDirection.down);
+        if (!TetrisRule.move(this._curTetris, MoveDirection.down, this._existSquares)) {
+          // 触底
+          this.hitBottom();
+        }
       }
     }, this._duration)
   }
@@ -117,5 +123,15 @@ export class Game {
     while (tetris.squares.some(s => s.point.y < 0)) {
       tetris.squares.forEach(sq => sq.point = { x: sq.point.x, y: sq.point.y + 1 });
     }
+  }
+
+  /**
+   * 触底之后的操作
+   */
+  private hitBottom() {
+    // 将当前的俄罗斯方块包含的小方块，加入到已存在的方块数组中
+    this._existSquares = this._existSquares.concat(this._curTetris!.squares);
+    // 切换方块
+    this.switchTetris();
   }
 }
