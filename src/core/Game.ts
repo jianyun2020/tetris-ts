@@ -132,6 +132,8 @@ export class Game {
   private hitBottom() {
     // 将当前的俄罗斯方块包含的小方块，加入到已存在的方块数组中
     this._existSquares = this._existSquares.concat(this._curTetris!.squares);
+    // 处理移除
+    const num = TetrisRule.deleteSquares(this._existSquares);
     // 切换方块
     this.switchTetris();
   }
