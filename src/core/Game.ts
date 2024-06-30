@@ -10,7 +10,7 @@ import { GameState, IGameViewer, MoveDirection } from "./types";
  */
 export class Game {
   // 游戏状态
-  private _gameState: GameState = GameState.init;
+  private _gameStatus: GameState = GameState.init;
   // 当前玩家操作的方块
   private _curTetris?: SquareGroup;
   // 下一个方块
@@ -22,11 +22,36 @@ export class Game {
   // 当前游戏中，已经存在的方块
   private _existSquares: Square[] = [];
   // 积分
-  private _score: number = 0;
+  private _score= 0;
 
   constructor(private _viewer: IGameViewer) {
+    this._duration = GameConfig.levels[0].duration;
     this._nextTetris = createTetris({ x: 0, y: 0 }); // 没有实际含义的代码，只是为了不让TS报错
     this.createNext();
+    this._viewer.init(this);
+    this._viewer.showScore(this.score);
+  }
+
+  public get gameStatus() {
+    return this._gameStatus;
+  }
+
+  public get score() {
+    return this._score;
+  }
+  public set score(value) {
+    this._score = value;
+    this._viewer.showScore(value);
+    const level = GameConfig.levels.filter(it => it.score <= value).pop()!;
+    if (level.duration === this._duration) {
+      return;
+    }
+    this._duration = level.duration;
+    if (this._timer) {
+      clearInterval(this._timer);
+      this._timer = undefined;
+      this.autoDrop();
+    }
   }
 
   private createNext() {
@@ -44,7 +69,7 @@ export class Game {
     this._existSquares = [];
     this.createNext();
     this._curTetris = undefined;
-    this._score = 0;
+    this.score = 0;
   }
 
   /**
@@ -52,57 +77,59 @@ export class Game {
    */
   start() {
     // 游戏状态的改变
-    if (this._gameState === GameState.playing) {
+    if (this._gameStatus === GameState.playing) {
       return;
     }
 
     // 从游戏结束到开始
-    if (this._gameState === GameState.over) {
+    if (this._gameStatus === GameState.over) {
       // 初始化操作
       this.init();
     }
 
-    this._gameState = GameState.playing;
+    this._gameStatus = GameState.playing;
     if (!this._curTetris) {
       // 给当前玩家操作的方块赋值
       this.switchTetris();
     }
 
     this.autoDrop();
+    this._viewer.onGameStart();
   }
 
   /**
    * 游戏暂停
    */
   pause() {
-    if (this._gameState === GameState.playing) {
-      this._gameState = GameState.pause;
+    if (this._gameStatus === GameState.playing) {
+      this._gameStatus = GameState.pause;
       clearInterval(this._timer);
       this._timer = undefined;
+      this._viewer.onGamePause();
     }
   }
 
   controLeft() {
-    if (this._curTetris && this._gameState === GameState.playing) {
+    if (this._curTetris && this._gameStatus === GameState.playing) {
       TetrisRule.move(this._curTetris, MoveDirection.left, this._existSquares);
     }
   }
 
   controlRight() {
-    if (this._curTetris && this._gameState === GameState.playing) {
+    if (this._curTetris && this._gameStatus === GameState.playing) {
       TetrisRule.move(this._curTetris, MoveDirection.right, this._existSquares);
     }
   }
 
   controlDown() {
-    if (this._curTetris && this._gameState === GameState.playing) {
+    if (this._curTetris && this._gameStatus === GameState.playing) {
       TetrisRule.moveDirectly(this._curTetris, MoveDirection.down, this._existSquares);
       this.hitBottom();
     }
   } 
 
   controlRotate() {
-    if (this._curTetris && this._gameState === GameState.playing) {
+    if (this._curTetris && this._gameStatus === GameState.playing) {
       TetrisRule.rotate(this._curTetris, this._existSquares);
     }
   }
@@ -124,9 +151,10 @@ export class Game {
     // 有可能出问题：当方块一出现时，就已经和之前的方块重叠了
     if (!TetrisRule.canIMove(this._curTetris.shape, this._curTetris.centerPoint, this._existSquares)) {
       // 游戏结束
-      this._gameState = GameState.over;
+      this._gameStatus = GameState.over;
       clearInterval(this._timer);
       this._timer = undefined;
+      this._viewer.onGameOver();
       return;
     }
 
@@ -138,7 +166,9 @@ export class Game {
    * 当前方块自由下落
    */
   private autoDrop() {
-    if (this._timer && this._gameState !== GameState.playing) {
+    console.log(this._duration);
+    
+    if (this._timer && this._gameStatus !== GameState.playing) {
       return;
     }
 
@@ -184,16 +214,16 @@ export class Game {
   }
 
   addScore(lineNum: number) {
-    if (lineNum) {
+    if (lineNum === 0) {
       return;
     } else if (lineNum === 1) {
-      this._score += 10;
+      this.score += 10;
     } else if (lineNum === 2) {
-      this._score += 25;
+      this.score += 25;
     } else if (lineNum === 3) {
-      this._score += 50;
+      this.score += 50;
     } else {
-      this._score += 100;
+      this.score += 100;
     }
   }
 }

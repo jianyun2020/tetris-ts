@@ -1,3 +1,4 @@
+import { Game } from "./Game";
 import { SquareGroup } from "./SquareGroup";
 
 export interface IPoint {
@@ -53,4 +54,19 @@ export interface IGameViewer {
    * @param tetris 切换的方块对象
    */
   switch(tetris: SquareGroup): void;
+
+  /**
+   * 完成界面初始化
+   */
+  init(game: Game): void;
+
+  /**
+   * 显示分数
+   * @param score 
+   */
+  showScore(score: number): void;
+
+  onGamePause(): void;
+  onGameStart():void;
+  onGameOver(): void;
 }
